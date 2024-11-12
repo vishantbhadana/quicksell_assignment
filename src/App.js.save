@@ -1,0 +1,50 @@
+// src/App.js
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import KanbanBoard from './components/KanbanBoard';
+
+function App() {
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const mockData = [
+        { id: 1, title: "Task 1", priority: "High", assignedTo: "Alice" },
+        { id: 2, title: "Task 2", priority: "Low", assignedTo: "Bob" },
+        { id: 3, title: "Task 3", priority: "Medium", assignedTo: "Alice" },
+        { id: 4, title: "Task 4", priority: "High", assignedTo: "Charlie" },
+    ];
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await axios.get('https://api.quicksell.co/v1/internal/frontend-assignment');
+                if (Array.isArray(response.data)) {
+                    setTasks(response.data);
+                } else {
+                    throw new Error("Invalid response format");
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setTasks(mockData); // Use mock data if API fails
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
+
+    return (
+        <div className="App">
+            <h1 style={{ textAlign: 'center', fontSize: '24px', margin: '20px 0' }}>Kanban Board</h1>
+            <KanbanBoard tasks={tasks} />
+        </div>
+    );
+}
+
+export default App;
+
